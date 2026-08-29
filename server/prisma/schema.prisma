@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  airbnb
+  booking
+}
+
+enum ReservationStatus {
+  confirmed
+  cancelled
+  completed
+}
+
+enum TaskType {
+  cleaning
+  maintenance
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  completed
+}
+
+enum MessageTemplate {
+  checkin
+  checkout
+  reminder
+}
+
+enum MessageStatus {
+  sent
+  failed
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  authProvider String   @default("credentials") @map("auth_provider")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  properties Property[]
+  providers  Provider[]
+
+  @@map("users")
+}
+
+model Property {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  name       String
+  address    String
+  platform   Platform
+  platformId String?  @map("platform_id")
+  maxGuests  Int      @map("max_guests")
+  basePrice  Decimal  @map("base_price") @db.Decimal(10, 2)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservations     Reservation[]
+  priceSuggestions PriceSuggestion[]
+
+  @@map("properties")
+}
+
+model Reservation {
+  id                    String             @id @default(cuid())
+  propertyId            String             @map("property_id")
+  guestName             String             @map("guest_name")
+  guestPhone            String             @map("guest_phone")
+  checkIn               DateTime           @map("check_in")
+  checkOut              DateTime           @map("check_out")
+  status                ReservationStatus  @default(confirmed)
+  platform              Platform
+  platformReservationId String             @unique @map("platform_reservation_id")
+  createdAt             DateTime           @default(now()) @map("created_at")
+
+  property Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tasks    Task[]
+  messages Message[]
+
+  @@map("reservations")
+}
+
+model Task {
+  id            String     @id @default(cuid())
+  reservationId String?    @map("reservation_id")
+  providerId    String?    @map("provider_id")
+  type          TaskType
+  status        TaskStatus @default(pending)
+  scheduledDate DateTime   @map("scheduled_date")
+  notes         String?
+  photoUrl      String?    @map("photo_url")
+  // Not in the original spec table: lets a provider open a link and
+  // complete the task without a full login system for providers.
+  accessToken   String     @unique @default(cuid()) @map("access_token")
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  provider    Provider?    @relation(fields: [providerId], references: [id], onDelete: SetNull)
+
+  @@map("tasks")
+}
+
+model Provider {
+  id       String  @id @default(cuid())
+  userId   String  @map("user_id")
+  name     String
+  phone    String
+  email    String?
+  isActive Boolean @default(true) @map("is_active")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@map("providers")
+}
+
+model Message {
+  id            String          @id @default(cuid())
+  reservationId String          @map("reservation_id")
+  template      MessageTemplate
+  sentAt        DateTime        @default(now()) @map("sent_at")
+  status        MessageStatus
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model PriceSuggestion {
+  id              String    @id @default(cuid())
+  propertyId      String    @map("property_id")
+  suggestedPrice  Decimal   @map("suggested_price") @db.Decimal(10, 2)
+  currentPrice    Decimal   @map("current_price") @db.Decimal(10, 2)
+  reason          String
+  createdAt       DateTime  @default(now()) @map("created_at")
+  acceptedAt      DateTime? @map("accepted_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("price_suggestions")
+}

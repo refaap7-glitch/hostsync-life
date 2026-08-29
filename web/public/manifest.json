@@ -1,0 +1,13 @@
+{
+  "name": "HostSync Lite",
+  "short_name": "HostSync",
+  "description": "Gestiona reservas, mensajes, tareas y precios de tus alquileres desde el celular.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F9FAFB",
+  "theme_color": "#2563EB",
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
