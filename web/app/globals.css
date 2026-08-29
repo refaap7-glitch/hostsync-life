@@ -6,8 +6,13 @@
   color-scheme: light;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   @apply bg-background text-foreground antialiased;
+  overflow-x: hidden;
 }
 
 * {

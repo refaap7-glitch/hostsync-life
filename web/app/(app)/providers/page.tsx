@@ -48,12 +48,12 @@ function ProviderCard({ provider }: { provider: { id: string; name: string; phon
   return (
     <Card>
       <CardContent className="flex flex-col gap-2 p-4">
-        <div className="flex items-start justify-between">
-          <p className="font-semibold text-foreground">{provider.name}</p>
-          <Badge variant={provider.isActive ? "success" : "neutral"}>{provider.isActive ? "Activo" : "Inactivo"}</Badge>
+        <div className="flex items-start justify-between gap-2">
+          <p className="min-w-0 truncate font-semibold text-foreground">{provider.name}</p>
+          <Badge variant={provider.isActive ? "success" : "neutral"} className="shrink-0">{provider.isActive ? "Activo" : "Inactivo"}</Badge>
         </div>
-        <p className="text-sm text-gray-500">{provider.phone}</p>
-        {provider.email && <p className="text-sm text-gray-500">{provider.email}</p>}
+        <p className="truncate text-sm text-gray-500">{provider.phone}</p>
+        {provider.email && <p className="truncate text-sm text-gray-500">{provider.email}</p>}
         <div className="mt-2 flex items-center gap-2">
           <Button
             variant="outline"

@@ -49,11 +49,11 @@ export default function PropertiesPage() {
             {properties.map((p) => (
               <Card key={p.id}>
                 <CardContent className="flex flex-col gap-1 p-4">
-                  <p className="font-semibold text-foreground">{p.name}</p>
-                  <p className="text-sm text-gray-500">{p.address}</p>
-                  <div className="mt-2 flex items-center justify-between text-sm">
+                  <p className="truncate font-semibold text-foreground">{p.name}</p>
+                  <p className="truncate text-sm text-gray-500">{p.address}</p>
+                  <div className="mt-2 flex items-center justify-between gap-2 text-sm">
                     <span className="capitalize text-gray-500">{p.platform}</span>
-                    <span className="font-semibold text-foreground">${Number(p.basePrice).toFixed(0)}/noche</span>
+                    <span className="shrink-0 font-semibold text-foreground">${Number(p.basePrice).toFixed(0)}/noche</span>
                   </div>
                   <p className="text-xs text-gray-400">Hasta {p.maxGuests} huespedes</p>
                 </CardContent>

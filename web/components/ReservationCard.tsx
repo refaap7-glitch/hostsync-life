@@ -23,11 +23,11 @@ export function ReservationCard({ reservation }: { reservation: Reservation }) {
     <Card>
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="font-semibold text-foreground">{reservation.guestName}</p>
-            <p className="text-sm text-gray-500">{reservation.property?.name}</p>
+          <div className="min-w-0">
+            <p className="truncate font-semibold text-foreground">{reservation.guestName}</p>
+            <p className="truncate text-sm text-gray-500">{reservation.property?.name}</p>
           </div>
-          <Badge variant={STATUS_VARIANT[reservation.status]}>{reservation.status}</Badge>
+          <Badge variant={STATUS_VARIANT[reservation.status]} className="shrink-0">{reservation.status}</Badge>
         </div>
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">

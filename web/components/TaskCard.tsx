@@ -26,16 +26,16 @@ export function TaskCard({ task }: { task: Task }) {
     <Card>
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Icon className="h-4 w-4" />
             </div>
-            <div>
-              <p className="font-semibold capitalize text-foreground">{task.type}</p>
-              <p className="text-sm text-gray-500">{task.reservation?.property?.name ?? "Sin propiedad asociada"}</p>
+            <div className="min-w-0">
+              <p className="truncate font-semibold capitalize text-foreground">{task.type}</p>
+              <p className="truncate text-sm text-gray-500">{task.reservation?.property?.name ?? "Sin propiedad asociada"}</p>
             </div>
           </div>
-          <Badge variant={STATUS_VARIANT[task.status]}>{STATUS_LABEL[task.status]}</Badge>
+          <Badge variant={STATUS_VARIANT[task.status]} className="shrink-0">{STATUS_LABEL[task.status]}</Badge>
         </div>
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
@@ -53,19 +53,19 @@ export function TaskCard({ task }: { task: Task }) {
           <img src={task.photoUrl} alt="Foto de la tarea completada" className="h-32 w-full rounded-md object-cover" />
         )}
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <a
             href={completionLink}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 text-xs text-primary hover:underline"
+            className="flex items-center gap-1 py-1 text-xs text-primary hover:underline"
           >
-            <Link2 className="h-3 w-3" />
+            <Link2 className="h-3 w-3 shrink-0" />
             Link para el proveedor
           </a>
 
           <Select
-            className="h-8 w-auto text-xs"
+            className="h-9 w-auto text-xs"
             value={task.status}
             onChange={(e) => updateStatus.mutate({ id: task.id, status: e.target.value as TaskStatus })}
           >

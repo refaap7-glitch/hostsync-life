@@ -14,12 +14,12 @@ export function PriceSuggestionCard({ suggestion }: { suggestion: PriceSuggestio
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-center gap-2">
           <div
-            className={`flex h-9 w-9 items-center justify-center rounded-full ${isIncrease ? "bg-secondary/10 text-secondary" : "bg-red-100 text-red-600"}`}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${isIncrease ? "bg-secondary/10 text-secondary" : "bg-red-100 text-red-600"}`}
           >
             <Icon className="h-4 w-4" />
           </div>
-          <div>
-            <p className="font-semibold text-foreground">{suggestion.property?.name}</p>
+          <div className="min-w-0">
+            <p className="truncate font-semibold text-foreground">{suggestion.property?.name}</p>
             <p className="text-sm text-gray-500">
               ${Number(suggestion.currentPrice).toFixed(0)} &rarr; ${Number(suggestion.suggestedPrice).toFixed(0)}
             </p>

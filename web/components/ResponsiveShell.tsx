@@ -52,9 +52,12 @@ export function ResponsiveShell({ children, userName }: { children: React.ReactN
           </button>
         </header>
 
-        <main className="flex-1 px-4 py-4 pb-20 sm:px-6 md:pb-6">{children}</main>
+        <main className="flex-1 px-4 py-4 pb-24 sm:px-6 md:pb-6">{children}</main>
 
-        <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-gray-200 bg-white py-2 md:hidden">
+        <nav
+          className="fixed inset-x-0 bottom-0 z-40 flex items-stretch border-t border-gray-200 bg-white md:hidden"
+          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        >
           {NAV_ITEMS.map((item) => (
             <MobileNavLink key={item.href} item={item} active={pathname === item.href} />
           ))}
@@ -88,12 +91,12 @@ function MobileNavLink({ item, active }: { item: NavItem; active: boolean }) {
     <Link
       href={item.href}
       className={cn(
-        "flex flex-col items-center gap-0.5 px-2 py-1 text-[11px] font-medium transition-colors",
+        "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-center text-[10.5px] font-medium leading-tight transition-colors active:bg-gray-50",
         active ? "text-primary" : "text-gray-500",
       )}
     >
-      <Icon className="h-5 w-5" />
-      {item.label}
+      <Icon className="h-5 w-5 shrink-0" />
+      <span className="truncate">{item.label}</span>
     </Link>
   );
 }
