@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual HostSync Lite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --brand-primary: #2563EB;
+    --brand-primary-ink: #1D4ED8;
+    --brand-secondary: #10B981;
+    --brand-accent: #F59E0B;
+
+    --paper: #F9FAFB;
+    --paper-raised: #FFFFFF;
+    --line: #E4E9F2;
+    --ink: #1F2937;
+    --ink-soft: #5B6472;
+    --ink-faint: #8A93A3;
+
+    --chip-success-bg: #ECFDF5;
+    --chip-success-ink: #047857;
+    --chip-warning-bg: #FFFBEB;
+    --chip-warning-ink: #B45309;
+    --chip-neutral-bg: #F1F4F9;
+    --chip-neutral-ink: #4B5568;
+
+    --shadow-card: 0 1px 2px rgba(31,41,55,0.04), 0 8px 24px -12px rgba(31,41,55,0.10);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --brand-primary: #3B82F6;
+      --brand-primary-ink: #60A5FA;
+      --brand-secondary: #34D399;
+      --brand-accent: #FBBF24;
+
+      --paper: #10131A;
+      --paper-raised: #171C26;
+      --line: #262E3D;
+      --ink: #E8EBF1;
+      --ink-soft: #9AA3B5;
+      --ink-faint: #6B7383;
+
+      --chip-success-bg: #0E2A22;
+      --chip-success-ink: #4ADE94;
+      --chip-warning-bg: #2E220C;
+      --chip-warning-ink: #FBBF24;
+      --chip-neutral-bg: #1E2430;
+      --chip-neutral-ink: #AEB6C4;
+
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --brand-primary: #3B82F6;
+    --brand-primary-ink: #60A5FA;
+    --brand-secondary: #34D399;
+    --brand-accent: #FBBF24;
+
+    --paper: #10131A;
+    --paper-raised: #171C26;
+    --line: #262E3D;
+    --ink: #E8EBF1;
+    --ink-soft: #9AA3B5;
+    --ink-faint: #6B7383;
+
+    --chip-success-bg: #0E2A22;
+    --chip-success-ink: #4ADE94;
+    --chip-warning-bg: #2E220C;
+    --chip-warning-ink: #FBBF24;
+    --chip-neutral-bg: #1E2430;
+    --chip-neutral-ink: #AEB6C4;
+
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: "Sora", "Inter", system-ui, sans-serif;
+    text-wrap: balance;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  a { color: var(--brand-primary); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 760px);
+    justify-content: center;
+    gap: 56px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 18px 72px; }
+    .toc { display: none; }
+  }
+
+  /* ---------- Top banner ---------- */
+  .hero {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 44px 24px 28px;
+  }
+  .hero-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .hero-mark {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(155deg, var(--brand-primary), var(--brand-primary-ink));
+    flex-shrink: 0;
+    box-shadow: var(--shadow-card);
+  }
+  .hero-eyebrow {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-primary);
+    margin: 0 0 2px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 4vw, 36px);
+    font-weight: 800;
+  }
+  .hero p.sub {
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 16px;
+    margin: 16px 0 0;
+  }
+
+  /* ---------- TOC ---------- */
+  .toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+  .toc-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 12px;
+  }
+  .toc ol {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 2px;
+    border-left: 1px solid var(--line);
+  }
+  .toc a {
+    display: block;
+    padding: 7px 0 7px 16px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .toc a:hover { color: var(--brand-primary); border-color: var(--line); }
+
+  /* ---------- Mobile step tracker ---------- */
+  .steptracker {
+    display: none;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 18px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .steptracker a {
+    flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 12px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  @media (max-width: 900px) { .steptracker { display: flex; } }
+
+  /* ---------- Main column ---------- */
+  main { min-width: 0; }
+
+  section { padding: 46px 0; border-top: 1px solid var(--line); }
+  section:first-of-type { border-top: none; padding-top: 4px; }
+
+  .section-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+  .step-num {
+    flex-shrink: 0;
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: var(--brand-primary);
+    color: #fff;
+    font-family: "Sora", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-num.alt { background: var(--brand-secondary); }
+  section h2 { font-size: 21px; font-weight: 700; margin-top: 5px; }
+  .kicker {
+    font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 4px;
+  }
+
+  .purpose {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--brand-accent);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+  }
+  .purpose strong { color: var(--ink); }
+
+  .howto { margin: 0 0 22px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .howto li {
+    display: flex; gap: 10px; align-items: baseline;
+    font-size: 15px;
+  }
+  .howto li::before {
+    content: "→";
+    color: var(--brand-primary);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .note {
+    font-size: 13.5px;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+
+  /* ---------- Fake UI kit (illustrative mockups) ---------- */
+  .mock {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .mock-chrome {
+    display: flex; gap: 5px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .mock-chrome span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--line);
+  }
+  .mock-body { padding: 20px; }
+  .mock-caption {
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .m-label { font-size: 12px; color: var(--ink-faint); margin-bottom: 4px; }
+  .m-field {
+    height: 34px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--paper);
+    margin-bottom: 12px;
+  }
+  .m-field.small { width: 60%; }
+
+  .m-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+  }
+  .m-btn.primary { background: var(--brand-primary); color: #fff; }
+  .m-btn.secondary { background: var(--brand-secondary); color: #fff; }
+  .m-btn.outline { background: transparent; border-color: var(--line); color: var(--ink); }
+
+  .m-pill {
+    display: inline-block;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .m-pill.success { background: var(--chip-success-bg); color: var(--chip-success-ink); }
+  .m-pill.warning { background: var(--chip-warning-bg); color: var(--chip-warning-ink); }
+  .m-pill.neutral { background: var(--chip-neutral-bg); color: var(--chip-neutral-ink); }
+
+  .m-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: var(--paper);
+  }
+  .m-card + .m-card { margin-top: 10px; }
+  .m-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .m-title { font-weight: 600; font-size: 14px; }
+  .m-sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+  .m-avatar { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(155deg, var(--brand-primary), var(--brand-secondary)); flex-shrink: 0; }
+
+  /* dashboard mini widgets */
+  .m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .m-stat { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--paper); }
+  .m-stat .n { font-family: "Sora", sans-serif; font-weight: 700; font-size: 20px; }
+  .m-stat .l { font-size: 11.5px; color: var(--ink-faint); }
+  .m-bars { display: flex; align-items: flex-end; gap: 6px; height: 46px; margin-top: 10px; }
+  .m-bars i { flex: 1; background: var(--brand-primary); opacity: .8; border-radius: 3px 3px 0 0; }
+
+  /* feature grid on intro */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 22px;
+  }
+  @media (max-width: 560px) { .feature-grid { grid-template-columns: 1fr; } }
+  .feature {
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .feature .ico {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; margin-bottom: 10px;
+  }
+  .feature h3 { font-size: 14.5px; font-weight: 700; margin-bottom: 4px; }
+  .feature p { font-size: 13px; color: var(--ink-soft); margin: 0; }
+
+  /* checklist */
+  .checklist {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .checklist li {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 14.5px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .checklist .box {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid var(--brand-secondary);
+    flex-shrink: 0; margin-top: 2px;
+  }
+
+  footer {
+    max-width: 1180px; margin: 0 auto; padding: 20px 24px 60px;
+    color: var(--ink-faint); font-size: 12.5px;
+    border-top: 1px solid var(--line);
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-mark"></div>
+    <div>
+      <p class="hero-eyebrow">Manual de uso</p>
+      <h1>HostSync Lite</h1>
+    </div>
+  </div>
+  <p class="sub">Guía paso a paso para anfitriones que gestionan entre 1 y 10 propiedades: reservas, mensajes a huéspedes, tareas de limpieza y mantenimiento, y precios. Pensada para entregar a un anfitrión nuevo el primer día que empieza a usar la plataforma.</p>
+</div>
+
+<div class="layout">
+  <nav class="toc">
+    <p class="toc-label">Contenido</p>
+    <ol>
+      <li><a href="#que-es">Qué es HostSync Lite</a></li>
+      <li><a href="#cuenta">Crear tu cuenta</a></li>
+      <li><a href="#propiedades">1. Cargar propiedades</a></li>
+      <li><a href="#proveedores">2. Cargar proveedores</a></li>
+      <li><a href="#reservas">3. Sincronizar reservas</a></li>
+      <li><a href="#mensajes">4. Mensajes a huéspedes</a></li>
+      <li><a href="#tareas">5. Asignar tareas</a></li>
+      <li><a href="#precios">6. Precios sugeridos</a></li>
+      <li><a href="#dashboard">El Dashboard</a></li>
+      <li><a href="#checklist">Resumen rápido</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <nav class="steptracker">
+      <a href="#que-es">Qué es</a>
+      <a href="#cuenta">Cuenta</a>
+      <a href="#propiedades">Propiedades</a>
+      <a href="#proveedores">Proveedores</a>
+      <a href="#reservas">Reservas</a>
+      <a href="#mensajes">Mensajes</a>
+      <a href="#tareas">Tareas</a>
+      <a href="#precios">Precios</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#checklist">Resumen</a>
+    </nav>
+
+    <!-- QUE ES -->
+    <section id="que-es">
+      <p class="kicker">Para empezar</p>
+      <h2>¿Qué es HostSync Lite?</h2>
+      <p class="purpose" style="margin-top:14px;">
+        Es la app donde el anfitrión organiza <strong>todo</strong> lo que hoy hace repartido entre Airbnb, Booking, WhatsApp y planillas sueltas: reservas, mensajes a huéspedes, coordinación con el equipo de limpieza/mantenimiento, y ajuste de precios. Pensada para quien maneja entre 1 y 10 propiedades sin un equipo administrativo detrás.
+      </p>
+      <div class="feature-grid">
+        <div class="feature">
+          <div class="ico" style="background:var(--chip-neutral-bg);">📅</div>
+          <h3>Reservas en un solo lugar</h3>
+          <p>Las reservas de Airbnb y Booking se ven juntas, con fechas de check-in y check-out.</p>
+        </div>
+        <div class="feature">
+          <div class="ico" style="background:var(--chip-success-bg);">💬</div>
+          <h3>Mensajes automáticos</h3>
+          <p>Check-in, check-out y recordatorios listos para enviar al huésped con un click.</p>
+        </div>
+        <div class="feature">
+          <div class="ico" style="background:var(--chip-warning-bg);">🧹</div>
+          <h3>Tareas con proveedores</h3>
+          <p>Asigná limpieza o mantenimiento; el proveedor confirma y sube una foto al terminar.</p>
+        </div>
+        <div class="feature">
+          <div class="ico" style="background:var(--chip-neutral-bg);">📈</div>
+          <h3>Precio sugerido</h3>
+          <p>Si la ocupación del mes está muy alta o muy baja, la app te sugiere subir o bajar la tarifa.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUENTA -->
+    <section id="cuenta">
+      <div class="section-head">
+        <div class="step-num alt">✓</div>
+        <div>
+          <p class="kicker">Antes de arrancar</p>
+          <h2>Creá tu cuenta</h2>
+        </div>
+      </div>
+      <p class="purpose"><strong>Para qué sirve:</strong> tu cuenta guarda tus propiedades, tus proveedores y el historial de reservas. Cada anfitrión ve solo su propia información.</p>
+      <ul class="howto">
+        <li>Entrá a la app y tocá <strong>"Registrate"</strong> desde la pantalla de inicio de sesión.</li>
+        <li>Cargá tu nombre, email y una contraseña (mínimo 8 caracteres).</li>
+        <li>Quedás con la sesión iniciada automáticamente — ya estás en el Dashboard.</li>
+      </ul>
+      <div class="mock" style="max-width:360px; margin:0 auto;">
+        <div class="mock-chrome"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div class="m-label">Nombre</div><div class="m-field"></div>
+          <div class="m-label">Email</div><div class="m-field"></div>
+          <div class="m-label">Contraseña</div><div class="m-field"></div>
+          <div class="m-btn primary" style="width:100%; justify-content:center;">Crear cuenta</div>
+        </div>
+      </div>
+      <p class="mock-caption">Pantalla de registro</p>
+    </section>
+
+    <!-- PROPIEDADES -->
+    <section id="propiedades">
+      <div class="section-head">
+        <div class="step-num">1</div>
+        <div>
+          <p class="kicker">Paso 1</p>
+          <h2>Cargá tus propiedades</h2>
+        </div>
+      </div>
+      <p class="purpose"><strong>Para qué sirve:</strong> es la base de todo — cada reserva, tarea y sugerencia de precio está asociada a una propiedad. Se carga una sola vez por propiedad.</p>
+      <ul class="howto">
+        <li>Andá a <strong>Propiedades</strong> en el menú y tocá <strong>"Agregar"</strong>.</li>
+        <li>Completá nombre, dirección, plataforma (Airbnb o Booking), cantidad máxima de huéspedes y precio por noche.</li>
+        <li>Guardá. La propiedad ya aparece en tu listado y lista para recibir reservas.</li>
+      </ul>
+      <div class="mock">
+        <div class="mock-chrome"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div class="m-grid">
+            <div class="m-card">
+              <div class="m-title">Loft Palermo</div>
+              <div class="m-sub">Av. Santa Fe 3200, CABA</div>
+              <div class="m-row" style="margin-top:8px;"><span class="m-pill neutral">airbnb</span><strong style="font-size:13px;">$85/noche</strong></div>
+            </div>
+            <div class="m-card">
+              <div class="m-title">Depto Recoleta</div>
+              <div class="m-sub">Vicente López 1900, CABA</div>
+              <div class="m-row" style="margin-top:8px;"><span class="m-pill neutral">booking</span><strong style="font-size:13px;">$60/noche</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="mock-caption">Listado de propiedades</p>
+    </section>
+
+    <!-- PROVEEDORES -->
+    <section id="proveedores">
+      <div class="section-head">
+        <div class="step-num">2</div>
+        <div>
+          <p class="kicker">Paso 2</p>
+          <h2>Cargá tus proveedores</h2>
+        </div>
+      </div>
+      <p class="purpose"><strong>Para qué sirve:</strong> son las personas o equipos de limpieza y mantenimiento a los que después les vas a asignar tareas. No necesitan crear una cuenta ni instalar nada.</p>
+      <ul class="howto">
+        <li>Andá a <strong>Proveedores</strong> y tocá <strong>"Agregar"</strong>.</li>
+        <li>Cargá nombre, teléfono (el mismo donde reciben WhatsApp) y, si querés, un email.</li>
+        <li>Podés desactivar un proveedor temporalmente sin borrarlo, si está de licencia.</li>
+      </ul>
+      <div class="mock">
+        <div class="mock-chrome"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div class="m-card">
+            <div class="m-row">
+              <div><div class="m-title">Limpieza Express</div><div class="m-sub">+54 9 11 2233-4455</div></div>
+              <span class="m-pill success">Activo</span>
+            </div>
+          </div>
+          <div class="m-card">
+            <div class="m-row">
+              <div><div class="m-title">Mantenimiento Juan</div><div class="m-sub">+54 9 11 3344-5566</div></div>
+              <span class="m-pill success">Activo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="mock-caption">Listado de proveedores</p>
+    </section>
+
+    <!-- RESERVAS -->
+    <section id="reservas">
+      <div class="section-head">
+        <div class="step-num">3</div>
+        <div>
+          <p class="kicker">Paso 3</p>
+          <h2>Sincronizá tus reservas</h2>
+        </div>
+      </div>
+      <p class="purpose"><strong>Para qué sirve:</strong> trae a la app las reservas de tus propiedades en Airbnb y Booking, para verlas todas juntas y poder actuar sobre ellas (mensajes, tareas).</p>
+      <ul class="howto">
+        <li>Andá a <strong>Reservas</strong> y tocá <strong>"Sincronizar"</strong>.</li>
+        <li>Las reservas nuevas aparecen con huésped, fechas de check-in/check-out y plataforma de origen.</li>
+        <li>Repetí la sincronización cuando quieras traer las reservas más recientes.</li>
+      </ul>
+      <div class="mock">
+        <div class="mock-chrome"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div class="m-row" style="margin-bottom:12px;">
+            <span style="font-weight:700; font-size:14px;">Reservas</span>
+            <span class="m-btn outline">↻ Sincronizar</span>
+          </div>
+          <div class="m-card">
+            <div class="m-row">
+              <div class="m-row" style="gap:10px;"><div class="m-avatar"></div><div><div class="m-title">Sofía Martínez</div><div class="m-sub">Loft Palermo · 31 ago – 3 sep</div></div></div>
+              <span class="m-pill success">confirmed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="mock-caption">Reservas sincronizadas</p>
+    </section>
+
+    <!-- MENSAJES -->
+    <section id="mensajes">
+      <div class="section-head">
+        <div class="step-num">4</div>
+        <div>
+          <p class="kicker">Paso 4</p>
+          <h2>Enviá mensajes automáticos al huésped</h2>
+        </div>
+      </div>
+      <p class="purpose"><strong>Para qué sirve:</strong> avisar el check-in, el check-out o un recordatorio sin escribir el mensaje a mano cada vez, directo por WhatsApp.</p>
+      <ul class="howto">
+        <li>Desde una tarjeta de reserva, tocá el botón <strong>"Mensaje"</strong>.</li>
+        <li>Elegí la plantilla: <em>Check-in</em>, <em>Check-out</em> o <em>Recordatorio</em>. Vas a ver una vista previa del texto antes de mandarlo.</li>
+        <li>Tocá <strong>"Enviar por WhatsApp"</strong>. La reserva queda con el estado del envío (enviado o no enviado).</li>
+      </ul>
+      <div class="mock" style="max-width:380px; margin:0 auto;">
+        <div class="mock-chrome"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div style="font-weight:700; font-size:14px; margin-bottom:12px;">Enviar mensaje a Sofía Martínez</div>
+          <div class="m-label">Plantilla</div>
+          <div class="m-field small" style="display:flex; align-items:center; padding:0 10px; font-size:12.5px; color:var(--ink-soft);">Check-in</div>
+          <div class="m-card" style="font-size:12.5px; color:var(--ink-soft); margin:10px 0 14px;">"Hola Sofía! Tu check-in en Loft Palermo es el 31/08. Cualquier consulta, escribinos."</div>
+          <div class="m-btn primary" style="width:100%; justify-content:center;">Enviar por WhatsApp</div>
+        </div>
+      </div>
+      <p class="mock-caption">Mensaje de check-in</p>
+    </section>
+
+    <!-- TAREAS -->
+    <section id="tareas">
+      <div class="section-head">
+        <div class="step-num">5</div>
+        <div>
+          <p class="kicker">Paso 5</p>
+          <h2>Asigná y seguí tareas de limpieza o mantenimiento</h2>
+        </div>
+      </div>
+      <p class="purpose"><strong>Para qué sirve:</strong> coordinar con tu equipo sin llamados ni planillas. El proveedor recibe un aviso con un link, y desde ahí marca la tarea como completada y sube una foto — sin necesitar usuario ni contraseña.</p>
+      <ul class="howto">
+        <li>Andá a <strong>Tareas</strong> y tocá <strong>"Asignar tarea"</strong>.</li>
+        <li>Elegí (opcional) la reserva relacionada, el proveedor, el tipo — limpieza o mantenimiento — y la fecha.</li>
+        <li>Al guardar, el proveedor recibe la notificación con el link de la tarea.</li>
+        <li>La tarea pasa de <em>Pendiente</em> → <em>En progreso</em> → <em>Completada</em> (con foto) a medida que avanza.</li>
+      </ul>
+      <div class="mock">
+        <div class="mock-chrome"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div class="m-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div>
+              <div class="m-sub" style="margin-bottom:8px; font-weight:600;">Pendientes</div>
+              <div class="m-card"><div class="m-title" style="font-size:13px;">🧹 Limpieza</div><div class="m-sub">Loft Palermo</div></div>
+            </div>
+            <div>
+              <div class="m-sub" style="margin-bottom:8px; font-weight:600;">En progreso</div>
+              <div class="m-card"><div class="m-title" style="font-size:13px;">🔧 Mantenimiento</div><div class="m-sub">Casa Nordelta</div></div>
+            </div>
+            <div>
+              <div class="m-sub" style="margin-bottom:8px; font-weight:600;">Completadas</div>
+              <div class="m-card"><span class="m-pill success">✓ con foto</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="mock-caption">Tablero de tareas</p>
+    </section>
+
+    <!-- PRECIOS -->
+    <section id="precios">
+      <div class="section-head">
+        <div class="step-num">6</div>
+        <div>
+          <p class="kicker">Paso 6</p>
+          <h2>Revisá los precios sugeridos</h2>
+        </div>
+      </div>
+      <p class="purpose"><strong>Para qué sirve:</strong> la app mira la ocupación del mes de cada propiedad. Si está por encima del 80%, sugiere subir el precio un 10%; si está por debajo del 30%, sugiere bajarlo un 10%. Vos decidís si aplicarlo.</p>
+      <ul class="howto">
+        <li>Andá a <strong>Propiedades</strong> — si hay una sugerencia disponible, aparece arriba de tu listado.</li>
+        <li>Mirá el motivo (la ocupación que la generó) y el precio actual vs. el sugerido.</li>
+        <li>Tocá <strong>"Aceptar sugerencia"</strong> para aplicar el nuevo precio, o dejala pasar si no te sirve.</li>
+      </ul>
+      <div class="mock" style="max-width:380px; margin:0 auto;">
+        <div class="mock-chrome"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div class="m-card" style="border-left:3px solid var(--brand-accent);">
+            <div class="m-title">Casa Nordelta</div>
+            <div class="m-sub">$220 → $198</div>
+            <p style="font-size:12.5px; color:var(--ink-soft); margin:8px 0 12px;">Ocupación del 0% este mes (&lt;30%): se sugiere bajar el precio un 10%.</p>
+            <div class="m-btn secondary">Aceptar sugerencia</div>
+          </div>
+        </div>
+      </div>
+      <p class="mock-caption">Sugerencia de precio</p>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard">
+      <p class="kicker">De un vistazo</p>
+      <h2>El Dashboard</h2>
+      <p class="purpose" style="margin-top:14px;">Es la primera pantalla que ves al entrar. Junta lo más urgente de los seis pasos anteriores en un solo lugar, para no tener que ir sección por sección todos los días.</p>
+      <div class="mock">
+        <div class="mock-chrome"><span></span><span></span><span></span></div>
+        <div class="mock-body">
+          <div class="m-grid" style="margin-bottom:14px;">
+            <div class="m-stat"><div class="n">3</div><div class="l">Reservas próximas (7 días)</div></div>
+            <div class="m-stat"><div class="n">2</div><div class="l">Tareas pendientes</div></div>
+          </div>
+          <div class="m-sub" style="margin-bottom:6px; font-weight:600;">Ocupación (últimos 6 meses)</div>
+          <div class="m-bars">
+            <i style="height:20%"></i><i style="height:35%"></i><i style="height:28%"></i>
+            <i style="height:50%"></i><i style="height:40%"></i><i style="height:60%"></i>
+          </div>
+        </div>
+      </div>
+      <p class="mock-caption">Dashboard principal</p>
+    </section>
+
+    <!-- CHECKLIST -->
+    <section id="checklist">
+      <p class="kicker">Antes de tu primer día</p>
+      <h2>Resumen rápido</h2>
+      <p class="purpose" style="margin-top:14px;">Este orden te asegura que, la primera vez que uses la app, tengas todo listo para que las reservas ya lleguen con mensajes y tareas funcionando.</p>
+      <ul class="checklist">
+        <li><span class="box"></span><span>Crear la cuenta con tu email.</span></li>
+        <li><span class="box"></span><span>Cargar todas tus propiedades (nombre, dirección, plataforma, precio).</span></li>
+        <li><span class="box"></span><span>Cargar tus proveedores de limpieza y mantenimiento con su teléfono.</span></li>
+        <li><span class="box"></span><span>Sincronizar las reservas desde Reservas → Sincronizar.</span></li>
+        <li><span class="box"></span><span>Probar un mensaje de check-in con una reserva real.</span></li>
+        <li><span class="box"></span><span>Asignar tu primera tarea de limpieza y compartirle el link al proveedor.</span></li>
+        <li><span class="box"></span><span>Revisar el Dashboard cada mañana para ver lo pendiente del día.</span></li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>HostSync Lite — Manual de uso para anfitriones. <span style="color:var(--ink-faint);">Un producto de Touch Flow.</span></footer>
+</body>
+</html>

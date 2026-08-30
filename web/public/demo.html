@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo HostSync Lite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --primary: #2563EB;
+    --secondary: #10B981;
+    --accent: #F59E0B;
+
+    --paper: #EEF1F6;
+    --paper-raised: #FFFFFF;
+    --app-bg: #F9FAFB;
+    --line: #E4E9F2;
+    --ink: #1F2937;
+    --ink-soft: #5B6472;
+    --ink-faint: #8A93A3;
+
+    --chip-success-bg: #ECFDF5;
+    --chip-success-ink: #047857;
+    --chip-warning-bg: #FFFBEB;
+    --chip-warning-ink: #B45309;
+
+    --shadow-card: 0 1px 2px rgba(31,41,55,.05), 0 10px 24px -14px rgba(31,41,55,.16);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #05070B;
+      --paper-raised: #171B24;
+      --app-bg: #0E1117;
+      --line: #262C3A;
+      --ink: #E9ECF2;
+      --ink-soft: #9AA3B5;
+      --ink-faint: #6B7383;
+      --chip-success-bg: #0E2A22;
+      --chip-success-ink: #4ADE94;
+      --chip-warning-bg: #2E220C;
+      --chip-warning-ink: #FBBF24;
+      --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 14px 30px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #05070B;
+    --paper-raised: #171B24;
+    --app-bg: #0E1117;
+    --line: #262C3A;
+    --ink: #E9ECF2;
+    --ink-soft: #9AA3B5;
+    --ink-faint: #6B7383;
+    --chip-success-bg: #0E2A22;
+    --chip-success-ink: #4ADE94;
+    --chip-warning-bg: #2E220C;
+    --chip-warning-ink: #FBBF24;
+    --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 14px 30px -16px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  button { font-family: inherit; }
+
+  /* ---------- outer banner ---------- */
+  .banner {
+    background: var(--paper-raised);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    font-size: 12.5px;
+  }
+  .banner .tag { display: flex; align-items: center; gap: 7px; color: var(--ink-soft); font-weight: 600; }
+  .banner .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .banner a {
+    background: var(--primary); color: #fff; text-decoration: none;
+    font-weight: 700; font-size: 12px; padding: 7px 12px; border-radius: 999px; white-space: nowrap;
+  }
+
+  /* ---------- phone stage (centers + frames on wide screens, full-bleed on phones) ---------- */
+  .stage { display: flex; justify-content: center; padding: 0; }
+  @media (min-width: 640px) { .stage { padding: 28px 16px 40px; } }
+
+  .phone {
+    width: 100%;
+    max-width: 430px;
+    background: var(--app-bg);
+    min-height: calc(100vh - 45px);
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  @media (min-width: 640px) {
+    .phone {
+      min-height: 780px;
+      border-radius: 34px;
+      box-shadow: 0 40px 80px -30px rgba(0,0,0,.35), 0 0 0 9px #111, 0 0 0 11px #333;
+      overflow: hidden;
+    }
+  }
+
+  .app-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; background: var(--paper-raised); border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .app-header .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+  .app-header .mark { width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(155deg, var(--primary), var(--secondary)); }
+  .app-header .tab-title { font-size: 15px; font-weight: 700; }
+
+  .screens { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 28px; }
+  .screen { display: none; flex-direction: column; gap: 14px; animation: fadein .25s ease; }
+  .screen.active { display: flex; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  h2.h { font-size: 18px; font-weight: 800; margin: 0; }
+  p.sub { font-size: 13px; color: var(--ink-soft); margin: 2px 0 0; }
+
+  .card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 12px; padding: 14px; box-shadow: var(--shadow-card); }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .avatar { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(155deg, var(--primary), var(--secondary)); flex-shrink: 0; }
+  .title { font-weight: 700; font-size: 14px; }
+  .meta { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .pill { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .pill.success { background: var(--chip-success-bg); color: var(--chip-success-ink); }
+  .pill.warning { background: var(--chip-warning-bg); color: var(--chip-warning-ink); }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--paper-raised); }
+  .stat b { display: block; font-size: 21px; font-weight: 800; }
+  .stat span { font-size: 11px; color: var(--ink-faint); }
+  .bars { display: flex; gap: 5px; align-items: flex-end; height: 42px; margin-top: 8px; }
+  .bars i { flex: 1; background: var(--primary); opacity: .85; border-radius: 2px 2px 0 0; }
+
+  .section-label { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 -2px; }
+  .section-label span:first-child { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .03em; }
+  .section-label button.link { background: none; border: none; color: var(--primary); font-size: 12.5px; font-weight: 600; padding: 0; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: none; cursor: pointer;
+    font-weight: 700; font-size: 13px;
+    padding: 9px 14px; border-radius: 8px;
+    transition: transform .12s ease;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn.primary { background: var(--primary); color: #fff; }
+  .btn.secondary { background: var(--secondary); color: #06251A; }
+  .btn.outline { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+  .btn.block { width: 100%; }
+  .btn.sm { padding: 7px 11px; font-size: 12px; }
+
+  select, input[type="date"] {
+    width: 100%; height: 38px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--paper-raised); color: var(--ink); font-family: inherit; font-size: 13px; padding: 0 10px;
+  }
+  label.lbl { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 4px; display: block; }
+
+  /* bottom nav */
+  .bottom-nav {
+    display: flex; border-top: 1px solid var(--line); background: var(--paper-raised); flex-shrink: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-nav button {
+    flex: 1; background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 9px 4px 8px; font-size: 10.5px; font-weight: 600; color: var(--ink-faint);
+  }
+  .bottom-nav button.active { color: var(--primary); }
+  .bottom-nav svg { width: 20px; height: 20px; }
+
+  /* inline mini-panel (message composer / assign form) */
+  .panel { border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 10px; display: none; flex-direction: column; gap: 10px; }
+  .panel.open { display: flex; }
+  .preview-text { background: var(--app-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 12.5px; color: var(--ink-soft); }
+
+  /* toast */
+  #toast {
+    position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff; font-size: 13px; font-weight: 600;
+    padding: 10px 16px; border-radius: 999px; box-shadow: 0 10px 24px -8px rgba(0,0,0,.4);
+    opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
+    z-index: 200; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .empty { text-align: center; padding: 30px 10px; color: var(--ink-faint); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <span class="tag"><span class="dot"></span>Demo interactiva &middot; datos de ejemplo</span>
+  <a href="https://wa.me/5491176666550?text=Hola!%20Vi%20la%20demo%20de%20HostSync%20Lite%20y%20quiero%20saber%20m%C3%A1s" target="_blank" rel="noreferrer">Quiero esto →</a>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="app-header">
+      <div class="brand"><div class="mark"></div>HostSync Lite</div>
+      <span class="tab-title" id="tabTitle">Dashboard</span>
+    </div>
+
+    <div class="screens">
+      <!-- DASHBOARD -->
+      <section class="screen active" data-screen="dashboard">
+        <div>
+          <h2 class="h">Hola, Demo Host 👋</h2>
+          <p class="sub">Así se ve tu día apenas entrás.</p>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat"><b>3</b><span>Reservas próximas</span></div>
+          <div class="stat"><b>2</b><span>Tareas pendientes</span></div>
+        </div>
+
+        <div class="card">
+          <div class="row" style="margin-bottom:6px;"><span class="title" style="font-size:13px;">Ocupación (6 meses)</span></div>
+          <div class="bars"><i style="height:22%"></i><i style="height:38%"></i><i style="height:30%"></i><i style="height:52%"></i><i style="height:44%"></i><i style="height:66%"></i></div>
+        </div>
+
+        <div class="section-label"><span>Próximas reservas</span><button class="link" onclick="showScreen('reservas')">Ver todas</button></div>
+        <div class="card">
+          <div class="row"><div class="row" style="gap:9px;"><div class="avatar"></div><div><div class="title">Sofía Martínez</div><div class="meta">Loft Palermo · 31 ago – 3 sep</div></div></div><span class="pill success">confirmed</span></div>
+        </div>
+
+        <div class="section-label"><span>Tareas pendientes</span><button class="link" onclick="showScreen('tareas')">Ver todas</button></div>
+        <div class="card">
+          <div class="row"><span class="title">🧹 Limpieza · Loft Palermo</span><span class="pill warning">Pendiente</span></div>
+        </div>
+      </section>
+
+      <!-- RESERVAS -->
+      <section class="screen" data-screen="reservas">
+        <div>
+          <h2 class="h">Reservas</h2>
+          <p class="sub">Airbnb y Booking, juntas.</p>
+        </div>
+
+        <div class="card">
+          <div class="row"><div class="row" style="gap:9px;"><div class="avatar"></div><div><div class="title">Sofía Martínez</div><div class="meta">Loft Palermo · 31 ago – 3 sep</div></div></div><span class="pill success">confirmed</span></div>
+          <button class="btn outline sm" style="margin-top:10px;" onclick="togglePanel('msg-1')">💬 Mensaje</button>
+          <div class="panel" id="msg-1">
+            <div>
+              <label class="lbl">Plantilla</label>
+              <select onchange="updatePreview('msg-1', this.value, 'Sofía', 'Loft Palermo')">
+                <option value="checkin">Check-in</option>
+                <option value="checkout">Check-out</option>
+                <option value="reminder">Recordatorio</option>
+              </select>
+            </div>
+            <div class="preview-text" id="msg-1-preview">Hola Sofía! Tu check-in en Loft Palermo es el 31/08. Cualquier consulta, escribinos.</div>
+            <button class="btn primary block" onclick="sendMessage('msg-1')">Enviar por WhatsApp</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row"><div class="row" style="gap:9px;"><div class="avatar"></div><div><div class="title">Liam Chen</div><div class="meta">Depto Recoleta · 2 – 7 sep</div></div></div><span class="pill success">confirmed</span></div>
+          <button class="btn outline sm" style="margin-top:10px;" onclick="togglePanel('msg-2')">💬 Mensaje</button>
+          <div class="panel" id="msg-2">
+            <div>
+              <label class="lbl">Plantilla</label>
+              <select onchange="updatePreview('msg-2', this.value, 'Liam', 'Depto Recoleta')">
+                <option value="checkin">Check-in</option>
+                <option value="checkout">Check-out</option>
+                <option value="reminder">Recordatorio</option>
+              </select>
+            </div>
+            <div class="preview-text" id="msg-2-preview">Hola Liam! Tu check-in en Depto Recoleta es el 02/09. Cualquier consulta, escribinos.</div>
+            <button class="btn primary block" onclick="sendMessage('msg-2')">Enviar por WhatsApp</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row"><div class="row" style="gap:9px;"><div class="avatar"></div><div><div class="title">Mia Fernández</div><div class="meta">Casa Nordelta · 6 – 12 sep</div></div></div><span class="pill success">confirmed</span></div>
+        </div>
+      </section>
+
+      <!-- TAREAS -->
+      <section class="screen" data-screen="tareas">
+        <div class="row">
+          <div><h2 class="h">Tareas</h2><p class="sub">Limpieza y mantenimiento.</p></div>
+          <button class="btn primary sm" onclick="togglePanel('assign-panel')">+ Asignar</button>
+        </div>
+
+        <div class="panel" id="assign-panel">
+          <div>
+            <label class="lbl">Proveedor</label>
+            <select id="assign-provider">
+              <option>Limpieza Express</option>
+              <option>Mantenimiento Juan</option>
+            </select>
+          </div>
+          <div>
+            <label class="lbl">Tipo</label>
+            <select id="assign-type">
+              <option value="🧹 Limpieza">Limpieza</option>
+              <option value="🔧 Mantenimiento">Mantenimiento</option>
+            </select>
+          </div>
+          <button class="btn secondary block" onclick="assignTask()">Asignar y notificar</button>
+        </div>
+
+        <div id="task-list" style="display:flex; flex-direction:column; gap:10px;">
+          <div class="card"><div class="row"><span class="title">🧹 Limpieza · Loft Palermo</span><span class="pill warning">Pendiente</span></div></div>
+          <div class="card"><div class="row"><span class="title">🔧 Mantenimiento · Nordelta</span><span class="pill success">Completada</span></div></div>
+        </div>
+      </section>
+
+      <!-- PRECIOS -->
+      <section class="screen" data-screen="precios">
+        <div>
+          <h2 class="h">Precios sugeridos</h2>
+          <p class="sub">Según la ocupación real de cada propiedad.</p>
+        </div>
+        <div id="price-list" style="display:flex; flex-direction:column; gap:10px;">
+          <div class="card" style="border-left:3px solid var(--accent);" id="price-1">
+            <div class="title">Casa Nordelta</div>
+            <div class="meta" id="price-1-amounts">$220 → $198</div>
+            <p style="font-size:12px; color:var(--ink-soft); margin:8px 0 10px;">Ocupación del 18% este mes: se sugiere bajar el precio un 10%.</p>
+            <button class="btn secondary sm" onclick="acceptPrice('price-1', 220, 198)">Aceptar sugerencia</button>
+          </div>
+          <div class="card" style="border-left:3px solid var(--accent);" id="price-2">
+            <div class="title">Loft Palermo</div>
+            <div class="meta" id="price-2-amounts">$85 → $93.50</div>
+            <p style="font-size:12px; color:var(--ink-soft); margin:8px 0 10px;">Ocupación del 84% este mes: se sugiere subir el precio un 10%.</p>
+            <button class="btn secondary sm" onclick="acceptPrice('price-2', 85, 93.5)">Aceptar sugerencia</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="active" data-nav="dashboard" onclick="showScreen('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </button>
+      <button data-nav="reservas" onclick="showScreen('reservas')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
+        Reservas
+      </button>
+      <button data-nav="tareas" onclick="showScreen('tareas')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
+        Tareas
+      </button>
+      <button data-nav="precios" onclick="showScreen('precios')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
+        Precios
+      </button>
+    </nav>
+  </div>
+</div>
+
+<p style="text-align:center; font-size:11.5px; color:var(--ink-faint); padding:0 16px 20px;">HostSync Lite — Un producto de Touch Flow</p>
+
+<div id="toast"></div>
+
+<script>
+  var TAB_TITLES = { dashboard: "Dashboard", reservas: "Reservas", tareas: "Tareas", precios: "Precios" };
+  var TEMPLATES = {
+    checkin: function (name, prop) { return "Hola " + name + "! Tu check-in en " + prop + " es el 02/09. Cualquier consulta, escribinos."; },
+    checkout: function (name, prop) { return "Hola " + name + ", gracias por tu estadía en " + prop + ". Esperamos que la hayas pasado genial!"; },
+    reminder: function (name, prop) { return "Hola " + name + ", te recordamos tu reserva en " + prop + "."; }
+  };
+
+  function showScreen(name) {
+    document.querySelectorAll(".screen").forEach(function (el) { el.classList.toggle("active", el.dataset.screen === name); });
+    document.querySelectorAll(".bottom-nav button").forEach(function (el) { el.classList.toggle("active", el.dataset.nav === name); });
+    document.getElementById("tabTitle").textContent = TAB_TITLES[name];
+    document.querySelector(".screens").scrollTop = 0;
+  }
+
+  function togglePanel(id) {
+    var panel = document.getElementById(id);
+    var wasOpen = panel.classList.contains("open");
+    document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("open"); });
+    if (!wasOpen) panel.classList.add("open");
+  }
+
+  function updatePreview(id, template, name, prop) {
+    document.getElementById(id + "-preview").textContent = TEMPLATES[template](name, prop);
+  }
+
+  function sendMessage(id) {
+    togglePanel(id);
+    toast("Mensaje enviado ✓");
+  }
+
+  var taskSeq = 0;
+  function assignTask() {
+    var provider = document.getElementById("assign-provider").value;
+    var type = document.getElementById("assign-type").value;
+    taskSeq++;
+    var card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = '<div class="row"><span class="title">' + type + ' · Asignada a ' + provider + '</span><span class="pill warning">Pendiente</span></div>';
+    document.getElementById("task-list").prepend(card);
+    togglePanel("assign-panel");
+    toast("Tarea asignada — proveedor notificado ✓");
+  }
+
+  function acceptPrice(cardId, current, suggested) {
+    var card = document.getElementById(cardId);
+    card.querySelector("p").textContent = "Precio actualizado.";
+    card.querySelector("button").remove();
+    document.getElementById(cardId + "-amounts").textContent = "$" + suggested + " (nuevo precio)";
+    toast("Precio actualizado ✓");
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2200);
+  }
+</script>
+</body>
+</html>
