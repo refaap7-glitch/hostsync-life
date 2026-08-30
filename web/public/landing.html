@@ -117,6 +117,10 @@
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--primary) 60%, transparent); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-back { font-size: 13px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+  .nav-back:hover { color: var(--ink); }
+  @media (max-width: 480px) { .nav-back { display: none; } }
 
   /* ---------- Hero (fixed dark world, same in both themes) ---------- */
   .hero {
@@ -310,7 +314,10 @@
 <nav class="top">
   <div class="wrap">
     <div class="brand"><div class="mark"></div><span>HostSync Lite</span></div>
-    <a class="nav-cta" href="https://wa.me/5491176666550?text=Hola!%20Quiero%20saber%20m%C3%A1s%20de%20HostSync%20Lite" target="_blank" rel="noreferrer">Hablemos</a>
+    <div class="nav-right">
+      <a class="nav-back" href="https://touchflow-plataforma.netlify.app/inicio.html">← Touch Flow</a>
+      <a class="nav-cta" href="https://wa.me/5491176666550?text=Hola!%20Quiero%20saber%20m%C3%A1s%20de%20HostSync%20Lite" target="_blank" rel="noreferrer">Hablemos</a>
+    </div>
   </div>
 </nav>
 

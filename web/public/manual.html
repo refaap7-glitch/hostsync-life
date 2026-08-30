@@ -122,8 +122,12 @@
   .hero-inner {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 14px;
   }
+  .hero-brand { display: flex; align-items: center; gap: 14px; }
+  .hero-back { font-size: 13px; font-weight: 600; color: var(--ink-faint); text-decoration: none; white-space: nowrap; }
+  .hero-back:hover { color: var(--ink-soft); }
   .hero-mark {
     width: 44px; height: 44px; border-radius: 12px;
     background: linear-gradient(155deg, var(--brand-primary), var(--brand-primary-ink));
@@ -391,11 +395,14 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="hero-mark"></div>
-    <div>
-      <p class="hero-eyebrow">Manual de uso</p>
-      <h1>HostSync Lite</h1>
+    <div class="hero-brand">
+      <div class="hero-mark"></div>
+      <div>
+        <p class="hero-eyebrow">Manual de uso</p>
+        <h1>HostSync Lite</h1>
+      </div>
     </div>
+    <a class="hero-back" href="https://touchflow-plataforma.netlify.app/inicio.html">← Touch Flow</a>
   </div>
   <p class="sub">Guía paso a paso para anfitriones que gestionan entre 1 y 10 propiedades: reservas, mensajes a huéspedes, tareas de limpieza y mantenimiento, y precios. Pensada para entregar a un anfitrión nuevo el primer día que empieza a usar la plataforma.</p>
 </div>
